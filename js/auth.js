@@ -22,6 +22,15 @@ window.Auth = {
         return JSON.parse(localStorage.getItem('currentUser'));
     },
 
+    checkAuth: () => {
+        return !!Auth.getCurrentUser();
+    },
+
+    isAdmin: () => {
+        const u = Auth.getCurrentUser();
+        return !!u && u.role === 'admin';
+    },
+
     requireAuth: (role) => {
         const user = Auth.getCurrentUser();
         if (!user) {
