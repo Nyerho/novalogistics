@@ -1,52 +1,154 @@
+const FirebaseStore = {
+    _initialized: false,
+    _enabled: false,
+    _db: null,
+
+    init: () => {
+        if (FirebaseStore._initialized) return FirebaseStore._enabled;
+        FirebaseStore._initialized = true;
+
+        if (!window.firebase || !window.firebase.initializeApp || !window.firebase.firestore) {
+            FirebaseStore._enabled = false;
+            return false;
+        }
+
+        try {
+            if (!window.firebase.apps || window.firebase.apps.length === 0) {
+                window.firebase.initializeApp({
+                    apiKey: "AIzaSyAWYvxLeeqjW23t6bSorvWUJWE4Sd4BMRk",
+                    authDomain: "novalogistics-dc376.firebaseapp.com",
+                    projectId: "novalogistics-dc376",
+                    storageBucket: "novalogistics-dc376.firebasestorage.app",
+                    messagingSenderId: "645945966121",
+                    appId: "1:645945966121:web:7a5ccf9975a971272da638",
+                    measurementId: "G-N8N9R0ML2N"
+                });
+            }
+            FirebaseStore._db = window.firebase.firestore();
+            FirebaseStore._enabled = true;
+            return true;
+        } catch (e) {
+            FirebaseStore._enabled = false;
+            return false;
+        }
+    },
+
+    enabled: () => {
+        return FirebaseStore.init();
+    },
+
+    shipmentsCol: () => {
+        if (!FirebaseStore.enabled()) return null;
+        return FirebaseStore._db.collection('shipments');
+    },
+
+    upsertShipment: async (shipment) => {
+        const col = FirebaseStore.shipmentsCol();
+        if (!col || !shipment || !shipment.trackingId) return false;
+        try {
+            await col.doc(String(shipment.trackingId)).set(shipment, { merge: true });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
+
+    deleteShipment: async (trackingId) => {
+        const col = FirebaseStore.shipmentsCol();
+        if (!col) return false;
+        try {
+            await col.doc(String(trackingId)).delete();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
+
+    subscribeAll: (onChange) => {
+        const col = FirebaseStore.shipmentsCol();
+        if (!col) return null;
+        try {
+            return col.onSnapshot((snap) => {
+                const rows = [];
+                snap.forEach((doc) => {
+                    const data = doc.data();
+                    if (data) rows.push(data);
+                });
+                onChange(rows);
+            });
+        } catch (e) {
+            return null;
+        }
+    },
+
+    subscribeOne: (trackingId, onChange) => {
+        const col = FirebaseStore.shipmentsCol();
+        if (!col) return null;
+        try {
+            return col.doc(String(trackingId)).onSnapshot((doc) => {
+                const data = doc.exists ? doc.data() : null;
+                onChange(data);
+            });
+        } catch (e) {
+            return null;
+        }
+    }
+};
+
 window.ShipmentManager = {
+    _cache: [],
+    _unsubAll: null,
+
+    _normalizeId: (trackingId) => {
+        return String(trackingId || '').trim().toUpperCase();
+    },
+
+    _normalizeShipment: (s) => {
+        if (!s || typeof s !== 'object') return null;
+        const copy = { ...s };
+        copy.trackingId = ShipmentManager._normalizeId(copy.trackingId);
+        if (typeof copy.paymentStatus !== 'string') copy.paymentStatus = copy.isPaid ? 'Paid' : 'Unpaid';
+        if (!('paymentMethod' in copy)) copy.paymentMethod = null;
+        if (typeof copy.isApproved !== 'boolean') copy.isApproved = true;
+        if (typeof copy.isStopped !== 'boolean') copy.isStopped = false;
+        if (!('stopReason' in copy)) copy.stopReason = null;
+        if (!('description' in copy)) copy.description = 'Standard Package';
+        if (!('weight' in copy)) copy.weight = '1kg';
+        if (!Array.isArray(copy.history)) copy.history = [];
+        if (!Array.isArray(copy.route)) copy.route = [];
+        return copy;
+    },
+
+    enableRealtimeSync: () => {
+        if (!FirebaseStore.enabled()) return false;
+        if (ShipmentManager._unsubAll) return true;
+        ShipmentManager._unsubAll = FirebaseStore.subscribeAll((rows) => {
+            const normalized = rows.map(ShipmentManager._normalizeShipment).filter(Boolean);
+            ShipmentManager._cache = normalized;
+            try {
+                localStorage.setItem('courier_shipments', JSON.stringify(normalized));
+            } catch (e) {}
+        });
+        return true;
+    },
+
     getAllShipments: () => {
+        if (FirebaseStore.enabled()) {
+            ShipmentManager.enableRealtimeSync();
+            return Array.isArray(ShipmentManager._cache) ? ShipmentManager._cache : [];
+        }
         const data = JSON.parse(localStorage.getItem('courier_shipments'));
         const shipments = Array.isArray(data) ? data : [];
-        let mutated = false;
-        const normalized = shipments.map((s) => {
-            if (!s || typeof s !== 'object') return s;
-            const copy = { ...s };
-
-            if (typeof copy.paymentStatus !== 'string') {
-                copy.paymentStatus = copy.isPaid ? 'Paid' : 'Unpaid';
-                mutated = true;
-            }
-            if (!('paymentMethod' in copy)) {
-                copy.paymentMethod = null;
-                mutated = true;
-            }
-            if (typeof copy.isApproved !== 'boolean') {
-                copy.isApproved = true;
-                mutated = true;
-            }
-            if (typeof copy.isStopped !== 'boolean') {
-                copy.isStopped = false;
-                mutated = true;
-            }
-            if (!('stopReason' in copy)) {
-                copy.stopReason = null;
-                mutated = true;
-            }
-            if (!Array.isArray(copy.history)) {
-                copy.history = [];
-                mutated = true;
-            }
-            if (!Array.isArray(copy.route)) {
-                copy.route = [];
-                mutated = true;
-            }
-            return copy;
-        });
-
-        if (mutated) localStorage.setItem('courier_shipments', JSON.stringify(normalized));
+        const normalized = shipments.map(ShipmentManager._normalizeShipment).filter(Boolean);
+        localStorage.setItem('courier_shipments', JSON.stringify(normalized));
         return normalized;
     },
 
     getShipment: (trackingId) => {
-        const id = String(trackingId || '').trim().toUpperCase();
+        const id = ShipmentManager._normalizeId(trackingId);
         if (!id) return null;
         const shipments = ShipmentManager.getAllShipments();
-        return shipments.find(s => String(s.trackingId || '').trim().toUpperCase() === id);
+        return shipments.find(s => ShipmentManager._normalizeId(s.trackingId) === id) || null;
     },
 
     saveShipment: (shipment) => {
@@ -57,7 +159,9 @@ window.ShipmentManager = {
         } else {
             shipments.push(shipment);
         }
-        localStorage.setItem('courier_shipments', JSON.stringify(shipments));
+        ShipmentManager._cache = shipments.map(ShipmentManager._normalizeShipment).filter(Boolean);
+        localStorage.setItem('courier_shipments', JSON.stringify(ShipmentManager._cache));
+        FirebaseStore.upsertShipment(ShipmentManager._normalizeShipment(shipment));
     },
 
     generateTrackingId: () => {
@@ -75,7 +179,7 @@ window.ShipmentManager = {
 
     createShipment: (data) => {
         const shipment = {
-            trackingId: data.trackingId || ShipmentManager.generateUniqueTrackingId(),
+            trackingId: ShipmentManager._normalizeId(data.trackingId) || ShipmentManager.generateUniqueTrackingId(),
             sender: data.sender,
             receiver: data.receiver,
             origin: data.origin,
@@ -102,7 +206,9 @@ window.ShipmentManager = {
     deleteShipment: (trackingId) => {
         let shipments = ShipmentManager.getAllShipments();
         shipments = shipments.filter(s => s.trackingId !== trackingId);
+        ShipmentManager._cache = shipments;
         localStorage.setItem('courier_shipments', JSON.stringify(shipments));
+        FirebaseStore.deleteShipment(ShipmentManager._normalizeId(trackingId));
     },
 
     addUpdate: (trackingId, status, location, reason) => {
@@ -199,6 +305,28 @@ window.ShipmentManager = {
         });
         ShipmentManager.saveShipment(shipment);
         return true;
+    },
+
+    subscribeShipment: (trackingId, onChange) => {
+        const id = ShipmentManager._normalizeId(trackingId);
+        if (!id || !FirebaseStore.enabled()) return null;
+        return FirebaseStore.subscribeOne(id, (data) => {
+            const normalized = ShipmentManager._normalizeShipment(data);
+            if (normalized) {
+                const all = ShipmentManager.getAllShipments();
+                const idx = all.findIndex(s => ShipmentManager._normalizeId(s.trackingId) === id);
+                if (idx >= 0) {
+                    all[idx] = normalized;
+                } else {
+                    all.push(normalized);
+                }
+                ShipmentManager._cache = all;
+                try {
+                    localStorage.setItem('courier_shipments', JSON.stringify(all));
+                } catch (e) {}
+            }
+            onChange(normalized);
+        });
     }
 };
 

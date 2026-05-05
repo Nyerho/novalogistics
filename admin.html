@@ -6,6 +6,8 @@
     <title>Admin Dashboard - Nova Logistics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -91,6 +93,16 @@
                                     <input type="text" id="new-destination" class="form-control" required>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Package Type</label>
+                                    <input type="text" id="new-desc" class="form-control" placeholder="e.g. Documents, Electronics" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Weight</label>
+                                    <input type="text" id="new-weight" class="form-control" placeholder="e.g. 2kg" required>
+                                </div>
+                            </div>
                             <button type="submit" class="btn btn-primary w-100">Create Shipment</button>
                         </form>
                     </div>
@@ -151,6 +163,8 @@
                                 <th>Tracking ID</th>
                                 <th>Sender</th>
                                 <th>Receiver</th>
+                                <th>Package</th>
+                                <th>Weight</th>
                                 <th>Approval</th>
                                 <th>Status</th>
                                 <th>Cost</th>
@@ -181,6 +195,16 @@
                         <div class="mb-3">
                             <label class="form-label">Cost ($)</label>
                             <input type="number" id="edit-cost" class="form-control" step="0.01">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Package Type</label>
+                                <input type="text" id="edit-desc" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Weight</label>
+                                <input type="text" id="edit-weight" class="form-control">
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Origin</label>
@@ -266,6 +290,8 @@
                     <td>${s.trackingId}</td>
                     <td>${s.sender}</td>
                     <td>${s.receiver}</td>
+                    <td>${s.description || ''}</td>
+                    <td>${s.weight || ''}</td>
                     <td>${approvalBadge}</td>
                     <td>${s.currentStatus}</td>
                     <td>$${s.cost.toFixed(2)}</td>
@@ -306,6 +332,8 @@
         });
         window.setInterval(refreshShipments, 1500);
 
+        ShipmentManager.enableRealtimeSync();
+
         // Create Shipment
         const primeNewTrackingId = () => {
             const el = document.getElementById('new-tracking-id');
@@ -323,7 +351,9 @@
                 sender: document.getElementById('new-sender').value,
                 receiver: document.getElementById('new-receiver').value,
                 origin: document.getElementById('new-origin').value,
-                destination: document.getElementById('new-destination').value
+                destination: document.getElementById('new-destination').value,
+                description: document.getElementById('new-desc').value,
+                weight: document.getElementById('new-weight').value
             };
             const created = ShipmentManager.createShipment(data);
             alert(`Shipment Created! Tracking ID: ${created.trackingId}`);
@@ -396,6 +426,8 @@
             
             document.getElementById('edit-id').value = s.trackingId;
             document.getElementById('edit-cost').value = s.cost;
+            document.getElementById('edit-desc').value = s.description || '';
+            document.getElementById('edit-weight').value = s.weight || '';
             document.getElementById('edit-origin').value = s.origin;
             document.getElementById('edit-dest').value = s.destination;
             document.getElementById('edit-status').value = s.currentStatus;
@@ -461,6 +493,8 @@
             const s = ShipmentManager.getShipment(id);
             
             s.cost = parseFloat(document.getElementById('edit-cost').value);
+            s.description = document.getElementById('edit-desc').value || 'Standard Package';
+            s.weight = document.getElementById('edit-weight').value || '1kg';
             s.origin = document.getElementById('edit-origin').value;
             s.destination = document.getElementById('edit-dest').value;
             s.currentStatus = document.getElementById('edit-status').value;
