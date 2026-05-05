@@ -140,38 +140,38 @@
                                             <p class="small text-muted mb-2">Send exact amount to one of these wallets:</p>
                                             <div class="mb-2">
                                                 <strong>Bitcoin (BTC):</strong><br>
-                                                <code class="user-select-all text-break">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                                                <code id="pm-crypto-btc" class="user-select-all text-break"></code>
                                             </div>
                                             <div class="mb-2">
                                                 <strong>USDT (TRC20):</strong><br>
-                                                <code class="user-select-all text-break">T9yD14Nj9j7xAB4dbGeiX9h8veHsn9drap</code>
+                                                <code id="pm-crypto-usdt" class="user-select-all text-break"></code>
                                             </div>
                                             <div class="mb-0">
                                                 <strong>Ethereum (ETH):</strong><br>
-                                                <code class="user-select-all text-break">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</code>
+                                                <code id="pm-crypto-eth" class="user-select-all text-break"></code>
                                             </div>
+                                            <div id="pm-crypto-note" class="small text-muted mt-2"></div>
                                         </div>
 
                                         <!-- Bank Details -->
                                         <div id="details-Bank Transfer" class="payment-details d-none p-3 border rounded bg-light mb-3">
                                             <p class="small text-muted mb-2">Transfer to the following account:</p>
                                             <ul class="list-unstyled mb-0 small">
-                                                <li><strong>Bank:</strong> Chase Bank</li>
-                                                <li><strong>Account Name:</strong> Nova Logistics</li>
-                                                <li><strong>Account No:</strong> 1234567890</li>
-                                                <li><strong>Routing:</strong> 021000021</li>
+                                                <li><strong>Bank:</strong> <span id="pm-bank-name"></span></li>
+                                                <li><strong>Account Name:</strong> <span id="pm-bank-account-name"></span></li>
+                                                <li><strong>Account No:</strong> <span id="pm-bank-account-no"></span></li>
+                                                <li><strong>Routing:</strong> <span id="pm-bank-routing"></span></li>
+                                                <li><strong>SWIFT:</strong> <span id="pm-bank-swift"></span></li>
+                                                <li><strong>IBAN:</strong> <span id="pm-bank-iban"></span></li>
                                                 <li><strong>Ref:</strong> <span class="ref-tracking-id fw-bold"></span></li>
                                             </ul>
+                                            <div id="pm-bank-note" class="small text-muted mt-2"></div>
                                         </div>
 
                                         <!-- Card Details -->
                                         <div id="details-Card" class="payment-details d-none p-3 border rounded bg-light mb-3">
-                                            <p class="small text-muted mb-2">Enter card details:</p>
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Card Number" value="4242 4242 4242 4242" disabled>
-                                            <div class="row g-2">
-                                                <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="MM/YY" value="12/25" disabled></div>
-                                                <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="CVC" value="123" disabled></div>
-                                            </div>
+                                            <p id="pm-card-instructions" class="small text-muted mb-2"></p>
+                                            <a id="pm-card-link" class="btn btn-sm btn-outline-primary d-none" href="#" target="_blank" rel="noopener">Open Card Payment Link</a>
                                         </div>
 
                                         <button id="confirm-sent-btn" class="btn btn-warning w-100 fw-bold">
@@ -289,6 +289,69 @@
             if (method) method.value = '';
         }
 
+        let currentPaymentSettings = null;
+
+        function applyToken(text, trackingId) {
+            return String(text || '').split('{TRACKING_ID}').join(String(trackingId || ''));
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = String(value || '');
+        }
+
+        function applyPaymentSettings(settings, trackingId) {
+            const s = settings || (window.PaymentSettings ? PaymentSettings.get() : null);
+            if (!s) return;
+
+            const methodSelect = document.getElementById('payment-method');
+            const methodMap = {
+                'Crypto': 'crypto',
+                'Bank Transfer': 'bank',
+                'Card': 'card'
+            };
+            if (methodSelect) {
+                Array.from(methodSelect.options).forEach((opt) => {
+                    const key = methodMap[opt.value];
+                    if (!key) return;
+                    const enabled = !!(s.methods && s.methods[key]);
+                    opt.disabled = !enabled;
+                    opt.hidden = !enabled;
+                });
+                const selectedKey = methodMap[methodSelect.value];
+                if (selectedKey && !(s.methods && s.methods[selectedKey])) {
+                    methodSelect.value = '';
+                }
+            }
+
+            setText('pm-crypto-btc', (s.crypto && s.crypto.btc) || '');
+            setText('pm-crypto-usdt', (s.crypto && s.crypto.usdt) || '');
+            setText('pm-crypto-eth', (s.crypto && s.crypto.eth) || '');
+            setText('pm-crypto-note', applyToken(s.crypto && s.crypto.note, trackingId));
+
+            setText('pm-bank-name', (s.bank && s.bank.bankName) || '');
+            setText('pm-bank-account-name', (s.bank && s.bank.accountName) || '');
+            setText('pm-bank-account-no', (s.bank && s.bank.accountNo) || '');
+            setText('pm-bank-routing', (s.bank && s.bank.routing) || '');
+            setText('pm-bank-swift', (s.bank && s.bank.swift) || '');
+            setText('pm-bank-iban', (s.bank && s.bank.iban) || '');
+            setText('pm-bank-note', applyToken(s.bank && s.bank.note, trackingId));
+
+            setText('pm-card-instructions', applyToken(s.card && s.card.instructions, trackingId));
+            const cardLink = document.getElementById('pm-card-link');
+            if (cardLink) {
+                const href = (s.card && s.card.link) ? String(s.card.link).trim() : '';
+                if (href) {
+                    cardLink.href = href;
+                    cardLink.classList.remove('d-none');
+                } else {
+                    cardLink.href = '#';
+                    cardLink.classList.add('d-none');
+                }
+            }
+        }
+
         function renderShipment(shipment) {
             document.getElementById('tracking-result').classList.remove('d-none');
             
@@ -356,6 +419,8 @@
 
             // Fill Tracking ID in Bank Ref
             document.querySelectorAll('.ref-tracking-id').forEach(el => el.innerText = shipment.trackingId);
+
+            applyPaymentSettings(currentPaymentSettings, shipment.trackingId);
 
             // Handle "Proceed to Payment" Button
             const payBtn = document.getElementById('pay-btn');
@@ -429,6 +494,16 @@
             loader.classList.add('is-hidden');
             window.setTimeout(() => loader.remove(), 300);
         });
+
+        if (window.PaymentSettings) {
+            PaymentSettings.enableRealtimeSync();
+            PaymentSettings.subscribe((s) => {
+                currentPaymentSettings = s;
+                const currentId = document.getElementById('display-id');
+                const trackingId = currentId ? String(currentId.innerText || '').trim() : '';
+                if (trackingId) applyPaymentSettings(s, trackingId);
+            });
+        }
     </script>
 </body>
 </html>

@@ -92,6 +92,42 @@ const FirebaseStore = {
         } catch (e) {
             return null;
         }
+    },
+
+    docRef: (docPath) => {
+        if (!FirebaseStore.enabled()) return null;
+        const parts = String(docPath || '').split('/').filter(Boolean);
+        if (parts.length < 2 || parts.length % 2 !== 0) return null;
+        let ref = FirebaseStore._db;
+        for (let i = 0; i < parts.length; i += 2) {
+            ref = ref.collection(parts[i]).doc(parts[i + 1]);
+        }
+        return ref;
+    },
+
+    setDoc: async (docPath, data, options) => {
+        const ref = FirebaseStore.docRef(docPath);
+        if (!ref) return false;
+        try {
+            const merge = options && typeof options.merge === 'boolean' ? options.merge : true;
+            await ref.set(data, { merge });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
+
+    subscribeDoc: (docPath, onChange) => {
+        const ref = FirebaseStore.docRef(docPath);
+        if (!ref) return null;
+        try {
+            return ref.onSnapshot((doc) => {
+                const data = doc.exists ? doc.data() : null;
+                onChange(data);
+            });
+        } catch (e) {
+            return null;
+        }
     }
 };
 
@@ -325,6 +361,103 @@ window.ShipmentManager = {
                     localStorage.setItem('courier_shipments', JSON.stringify(all));
                 } catch (e) {}
             }
+            onChange(normalized);
+        });
+    }
+};
+
+window.PaymentSettings = {
+    _cache: null,
+    _unsub: null,
+    _storageKey: 'courier_payment_settings',
+    _docPath: 'config/payment',
+
+    _defaults: () => ({
+        methods: { crypto: true, bank: true, card: true },
+        crypto: { btc: '', usdt: '', eth: '', note: 'Send exact amount. Reference: {TRACKING_ID}' },
+        bank: { bankName: '', accountName: '', accountNo: '', routing: '', swift: '', iban: '', note: 'Use reference: {TRACKING_ID}' },
+        card: { instructions: 'Card payments are available on request. Contact support to receive a secure invoice link.', link: '' }
+    }),
+
+    _normalize: (value) => {
+        const base = window.PaymentSettings._defaults();
+        const v = value && typeof value === 'object' ? value : {};
+        const out = {
+            methods: {
+                crypto: !!(v.methods && v.methods.crypto),
+                bank: !!(v.methods && v.methods.bank),
+                card: !!(v.methods && v.methods.card)
+            },
+            crypto: {
+                btc: String(v.crypto && v.crypto.btc ? v.crypto.btc : base.crypto.btc),
+                usdt: String(v.crypto && v.crypto.usdt ? v.crypto.usdt : base.crypto.usdt),
+                eth: String(v.crypto && v.crypto.eth ? v.crypto.eth : base.crypto.eth),
+                note: String(v.crypto && v.crypto.note ? v.crypto.note : base.crypto.note)
+            },
+            bank: {
+                bankName: String(v.bank && v.bank.bankName ? v.bank.bankName : base.bank.bankName),
+                accountName: String(v.bank && v.bank.accountName ? v.bank.accountName : base.bank.accountName),
+                accountNo: String(v.bank && v.bank.accountNo ? v.bank.accountNo : base.bank.accountNo),
+                routing: String(v.bank && v.bank.routing ? v.bank.routing : base.bank.routing),
+                swift: String(v.bank && v.bank.swift ? v.bank.swift : base.bank.swift),
+                iban: String(v.bank && v.bank.iban ? v.bank.iban : base.bank.iban),
+                note: String(v.bank && v.bank.note ? v.bank.note : base.bank.note)
+            },
+            card: {
+                instructions: String(v.card && v.card.instructions ? v.card.instructions : base.card.instructions),
+                link: String(v.card && v.card.link ? v.card.link : base.card.link)
+            }
+        };
+        return out;
+    },
+
+    get: () => {
+        if (window.PaymentSettings._cache) return window.PaymentSettings._cache;
+        let raw = null;
+        try {
+            raw = JSON.parse(localStorage.getItem(window.PaymentSettings._storageKey) || 'null');
+        } catch (e) {
+            raw = null;
+        }
+        window.PaymentSettings._cache = window.PaymentSettings._normalize(raw);
+        return window.PaymentSettings._cache;
+    },
+
+    save: async (settings) => {
+        const normalized = window.PaymentSettings._normalize(settings);
+        window.PaymentSettings._cache = normalized;
+        try {
+            localStorage.setItem(window.PaymentSettings._storageKey, JSON.stringify(normalized));
+        } catch (e) {}
+        if (FirebaseStore.enabled()) {
+            await FirebaseStore.setDoc(window.PaymentSettings._docPath, normalized, { merge: true });
+        }
+        return true;
+    },
+
+    enableRealtimeSync: () => {
+        if (!FirebaseStore.enabled()) return false;
+        if (window.PaymentSettings._unsub) return true;
+        window.PaymentSettings._unsub = FirebaseStore.subscribeDoc(window.PaymentSettings._docPath, (data) => {
+            const normalized = window.PaymentSettings._normalize(data);
+            window.PaymentSettings._cache = normalized;
+            try {
+                localStorage.setItem(window.PaymentSettings._storageKey, JSON.stringify(normalized));
+            } catch (e) {}
+        });
+        return !!window.PaymentSettings._unsub;
+    },
+
+    subscribe: (onChange) => {
+        window.PaymentSettings.enableRealtimeSync();
+        onChange(window.PaymentSettings.get());
+        if (!FirebaseStore.enabled()) return null;
+        return FirebaseStore.subscribeDoc(window.PaymentSettings._docPath, (data) => {
+            const normalized = window.PaymentSettings._normalize(data);
+            window.PaymentSettings._cache = normalized;
+            try {
+                localStorage.setItem(window.PaymentSettings._storageKey, JSON.stringify(normalized));
+            } catch (e) {}
             onChange(normalized);
         });
     }

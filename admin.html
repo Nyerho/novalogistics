@@ -179,6 +179,92 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-white fw-bold">Payment Options & Details</div>
+            <div class="card-body">
+                <form id="payment-settings-form">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="pm-crypto-enabled">
+                                <label class="form-check-label" for="pm-crypto-enabled">Enable Crypto</label>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">BTC Address</label>
+                                <input type="text" id="pm-btc" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">USDT Address</label>
+                                <input type="text" id="pm-usdt" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">ETH Address</label>
+                                <input type="text" id="pm-eth" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Crypto Note</label>
+                                <textarea id="pm-crypto-note" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="pm-bank-enabled">
+                                <label class="form-check-label" for="pm-bank-enabled">Enable Bank Transfer</label>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Bank Name</label>
+                                <input type="text" id="pm-bank-name" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Account Name</label>
+                                <input type="text" id="pm-bank-account-name" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Account No</label>
+                                <input type="text" id="pm-bank-account-no" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Routing</label>
+                                <input type="text" id="pm-bank-routing" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">SWIFT</label>
+                                <input type="text" id="pm-bank-swift" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">IBAN</label>
+                                <input type="text" id="pm-bank-iban" class="form-control">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Bank Note</label>
+                                <textarea id="pm-bank-note" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="pm-card-enabled">
+                                <label class="form-check-label" for="pm-card-enabled">Enable Card</label>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Card Instructions</label>
+                                <textarea id="pm-card-instructions" class="form-control" rows="4"></textarea>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Card Link (optional)</label>
+                                <input type="url" id="pm-card-link" class="form-control" placeholder="https://...">
+                            </div>
+                            <div class="small text-muted mt-2">Tip: You can use {TRACKING_ID} inside notes.</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">Save Payment Settings</button>
+                    <div id="payment-settings-saved" class="alert alert-success d-none mt-3 mb-0">Payment settings saved.</div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Edit Modal -->
@@ -333,6 +419,68 @@
         window.setInterval(refreshShipments, 1500);
 
         ShipmentManager.enableRealtimeSync();
+
+        const renderPaymentSettings = (settings) => {
+            const s = settings || PaymentSettings.get();
+            document.getElementById('pm-crypto-enabled').checked = !!(s.methods && s.methods.crypto);
+            document.getElementById('pm-bank-enabled').checked = !!(s.methods && s.methods.bank);
+            document.getElementById('pm-card-enabled').checked = !!(s.methods && s.methods.card);
+
+            document.getElementById('pm-btc').value = (s.crypto && s.crypto.btc) || '';
+            document.getElementById('pm-usdt').value = (s.crypto && s.crypto.usdt) || '';
+            document.getElementById('pm-eth').value = (s.crypto && s.crypto.eth) || '';
+            document.getElementById('pm-crypto-note').value = (s.crypto && s.crypto.note) || '';
+
+            document.getElementById('pm-bank-name').value = (s.bank && s.bank.bankName) || '';
+            document.getElementById('pm-bank-account-name').value = (s.bank && s.bank.accountName) || '';
+            document.getElementById('pm-bank-account-no').value = (s.bank && s.bank.accountNo) || '';
+            document.getElementById('pm-bank-routing').value = (s.bank && s.bank.routing) || '';
+            document.getElementById('pm-bank-swift').value = (s.bank && s.bank.swift) || '';
+            document.getElementById('pm-bank-iban').value = (s.bank && s.bank.iban) || '';
+            document.getElementById('pm-bank-note').value = (s.bank && s.bank.note) || '';
+
+            document.getElementById('pm-card-instructions').value = (s.card && s.card.instructions) || '';
+            document.getElementById('pm-card-link').value = (s.card && s.card.link) || '';
+        };
+
+        PaymentSettings.enableRealtimeSync();
+        PaymentSettings.subscribe((s) => {
+            renderPaymentSettings(s);
+        });
+
+        document.getElementById('payment-settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const next = {
+                methods: {
+                    crypto: document.getElementById('pm-crypto-enabled').checked,
+                    bank: document.getElementById('pm-bank-enabled').checked,
+                    card: document.getElementById('pm-card-enabled').checked
+                },
+                crypto: {
+                    btc: document.getElementById('pm-btc').value.trim(),
+                    usdt: document.getElementById('pm-usdt').value.trim(),
+                    eth: document.getElementById('pm-eth').value.trim(),
+                    note: document.getElementById('pm-crypto-note').value
+                },
+                bank: {
+                    bankName: document.getElementById('pm-bank-name').value.trim(),
+                    accountName: document.getElementById('pm-bank-account-name').value.trim(),
+                    accountNo: document.getElementById('pm-bank-account-no').value.trim(),
+                    routing: document.getElementById('pm-bank-routing').value.trim(),
+                    swift: document.getElementById('pm-bank-swift').value.trim(),
+                    iban: document.getElementById('pm-bank-iban').value.trim(),
+                    note: document.getElementById('pm-bank-note').value
+                },
+                card: {
+                    instructions: document.getElementById('pm-card-instructions').value,
+                    link: document.getElementById('pm-card-link').value.trim()
+                }
+            };
+            await PaymentSettings.save(next);
+            const saved = document.getElementById('payment-settings-saved');
+            saved.classList.remove('d-none');
+            window.setTimeout(() => saved.classList.add('d-none'), 2500);
+        });
 
         // Create Shipment
         const primeNewTrackingId = () => {
