@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Nova Logistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+    <div id="page-loader" class="page-loader">
+        <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="loader-logo" alt="Nova Logistics">
+    </div>
+    <script>
+        (function () {
+            function hideLoader() {
+                const loader = document.getElementById('page-loader');
+                if (!loader) return;
+                loader.classList.add('is-hidden');
+                window.setTimeout(() => {
+                    if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+                }, 300);
+            }
+
+            if (document.readyState === 'complete') {
+                hideLoader();
+            } else {
+                window.addEventListener('load', hideLoader);
+                document.addEventListener('DOMContentLoaded', hideLoader);
+                window.setTimeout(hideLoader, 2500);
+            }
+        })();
+    </script>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="brand-logo" alt="Nova Logistics">
+                <span>Nova Logistics Admin</span>
+            </a>
+            <div class="d-flex">
+                <span class="navbar-text me-3 text-white">Welcome, Admin</span>
+                <button id="logout-btn" class="btn btn-outline-light btn-sm">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-hero">
+        <div class="container">
+            <div class="admin-hero-inner">
+                <div class="admin-hero-title">Operations Console</div>
+                <div class="admin-hero-subtitle">Create shipments, manage route updates, confirm payments</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row">
+            <!-- Create Shipment -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold">Create New Shipment</div>
+                    <div class="card-body">
+                        <form id="create-shipment-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tracking ID</label>
+                                    <input type="text" id="new-tracking-id" class="form-control" placeholder="Auto-generated" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Cost ($)</label>
+                                    <input type="number" id="new-cost" class="form-control" placeholder="0.00" step="0.01">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Sender Name</label>
+                                <input type="text" id="new-sender" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Receiver Name</label>
+                                <input type="text" id="new-receiver" class="form-control" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Origin</label>
+                                    <input type="text" id="new-origin" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Destination</label>
+                                    <input type="text" id="new-destination" class="form-control" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Create Shipment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Shipment -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold">Update Shipment Status</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Select Shipment</label>
+                            <select id="shipment-select" class="form-select">
+                                <option value="">Select a shipment...</option>
+                            </select>
+                        </div>
+                        
+                        <div id="update-form-container" class="d-none">
+                            <div class="alert alert-info" id="current-status-info"></div>
+                            
+                            <form id="update-shipment-form">
+                                <div class="mb-3">
+                                    <label class="form-label">New Status</label>
+                                    <select id="update-status" class="form-select" required>
+                                        <option value="Picked Up">Picked Up</option>
+                                        <option value="In Transit">In Transit</option>
+                                        <option value="Arrived at Hub">Arrived at Hub</option>
+                                        <option value="Out for Delivery">Out for Delivery</option>
+                                        <option value="Delivered">Delivered</option>
+                                        <option value="On Hold">On Hold (Stop)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Current Location</label>
+                                    <input type="text" id="update-location" class="form-control" placeholder="City or Facility Name" required>
+                                </div>
+                                <div class="mb-3 d-none" id="stop-reason-container">
+                                    <label class="form-label">Reason for Stop</label>
+                                    <input type="text" id="stop-reason" class="form-control" placeholder="e.g. Customs inspection, Address issue">
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Add Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Shipments Table -->
+        <div class="card">
+            <div class="card-header bg-white fw-bold">All Shipments</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tracking ID</th>
+                                <th>Sender</th>
+                                <th>Receiver</th>
+                                <th>Approval</th>
+                                <th>Status</th>
+                                <th>Cost</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipments-table">
+                            <!-- JS will populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Shipment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-form">
+                        <input type="hidden" id="edit-id">
+                        <div class="mb-3">
+                            <label class="form-label">Cost ($)</label>
+                            <input type="number" id="edit-cost" class="form-control" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Origin</label>
+                            <input type="text" id="edit-origin" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Destination</label>
+                            <input type="text" id="edit-dest" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select id="edit-status" class="form-select">
+                                <option value="Pending">Pending</option>
+                                <option value="Order Created">Order Created</option>
+                                <option value="Picked Up">Picked Up</option>
+                                <option value="In Transit">In Transit</option>
+                                <option value="Arrived at Hub">Arrived at Hub</option>
+                                <option value="Out for Delivery">Out for Delivery</option>
+                                <option value="Delivered">Delivered</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select id="edit-payment-status" class="form-select">
+                                        <option value="Unpaid">Unpaid</option>
+                                        <option value="Processing">Processing</option>
+                                        <option value="Paid">Paid</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" id="edit-payment-method" class="form-control" placeholder="Method (Card/Bank/Crypto)">
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center mt-2">
+                                <span id="payment-status-badge" class="badge bg-secondary">Unpaid</span>
+                                <button type="button" id="confirm-payment-btn" class="btn btn-sm btn-success d-none">Confirm Payment</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check Auth
+        if (!Auth.checkAuth() || !Auth.isAdmin()) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            Auth.logout();
+        });
+
+        // Initialize
+        const loadShipments = () => {
+            const prevSelectedId = document.getElementById('shipment-select').value;
+            const shipments = ShipmentManager.getAllShipments();
+            // Sort by newest first (assuming higher/later created ones are at the end, let's reverse)
+            shipments.reverse();
+            
+            const tbody = document.getElementById('shipments-table');
+            tbody.innerHTML = '';
+            
+            const select = document.getElementById('shipment-select');
+            select.innerHTML = '<option value="">Select a shipment...</option>';
+
+            shipments.forEach(s => {
+                // Populate Table
+                const tr = document.createElement('tr');
+                let paymentBadge = s.paymentStatus === 'Paid' ? '<span class="badge bg-success">Paid</span>' : 
+                                   (s.paymentStatus === 'Processing' ? '<span class="badge bg-warning text-dark">Processing</span>' : '<span class="badge bg-secondary">Unpaid</span>');
+                const approvalBadge = s.isApproved ? '<span class="badge bg-success">Confirmed</span>' : '<span class="badge bg-warning text-dark">Pending</span>';
+                const confirmBtn = s.isApproved ? '' : `<button class="btn btn-sm btn-success me-1" onclick="confirmShip('${s.trackingId}')">Confirm</button>`;
+                
+                tr.innerHTML = `
+                    <td>${s.trackingId}</td>
+                    <td>${s.sender}</td>
+                    <td>${s.receiver}</td>
+                    <td>${approvalBadge}</td>
+                    <td>${s.currentStatus}</td>
+                    <td>$${s.cost.toFixed(2)}</td>
+                    <td>${paymentBadge}</td>
+                    <td>
+                        ${confirmBtn}
+                        <button class="btn btn-sm btn-primary me-1" onclick="openEdit('${s.trackingId}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteShip('${s.trackingId}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // Populate Select
+                const option = document.createElement('option');
+                option.value = s.trackingId;
+                option.text = `${s.trackingId} - ${s.sender} -> ${s.receiver}`;
+                select.appendChild(option);
+            });
+
+            if (prevSelectedId) {
+                select.value = prevSelectedId;
+                select.dispatchEvent(new Event('change'));
+            }
+        };
+
+        let lastShipmentsSnapshot = '';
+        const refreshShipments = () => {
+            const next = JSON.stringify(ShipmentManager.getAllShipments());
+            if (next !== lastShipmentsSnapshot) {
+                lastShipmentsSnapshot = next;
+                loadShipments();
+            }
+        };
+
+        refreshShipments();
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'courier_shipments') refreshShipments();
+        });
+        window.setInterval(refreshShipments, 1500);
+
+        // Create Shipment
+        const primeNewTrackingId = () => {
+            const el = document.getElementById('new-tracking-id');
+            el.value = ShipmentManager.generateUniqueTrackingId();
+        };
+
+        primeNewTrackingId();
+
+        document.getElementById('create-shipment-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const trackingId = document.getElementById('new-tracking-id').value || ShipmentManager.generateUniqueTrackingId();
+            const data = {
+                trackingId,
+                cost: document.getElementById('new-cost').value,
+                sender: document.getElementById('new-sender').value,
+                receiver: document.getElementById('new-receiver').value,
+                origin: document.getElementById('new-origin').value,
+                destination: document.getElementById('new-destination').value
+            };
+            const created = ShipmentManager.createShipment(data);
+            alert(`Shipment Created! Tracking ID: ${created.trackingId}`);
+            e.target.reset();
+            primeNewTrackingId();
+            loadShipments();
+        });
+
+        document.getElementById('update-status').addEventListener('change', (e) => {
+            const isHold = e.target.value === 'On Hold';
+            const container = document.getElementById('stop-reason-container');
+            const input = document.getElementById('stop-reason');
+            if (isHold) {
+                container.classList.remove('d-none');
+                input.required = true;
+            } else {
+                container.classList.add('d-none');
+                input.required = false;
+                input.value = '';
+            }
+        });
+
+        // Update Selection Logic
+        document.getElementById('shipment-select').addEventListener('change', (e) => {
+            const id = e.target.value;
+            const container = document.getElementById('update-form-container');
+            const info = document.getElementById('current-status-info');
+            
+            if (id) {
+                const s = ShipmentManager.getShipment(id);
+                container.classList.remove('d-none');
+                if (!s.isApproved) {
+                    info.innerText = 'Shipment is pending confirmation. Confirm shipment (and set cost) before adding tracking updates.';
+                    Array.from(document.querySelectorAll('#update-shipment-form input, #update-shipment-form select, #update-shipment-form button')).forEach(el => el.disabled = true);
+                } else {
+                    Array.from(document.querySelectorAll('#update-shipment-form input, #update-shipment-form select, #update-shipment-form button')).forEach(el => el.disabled = false);
+                    info.innerText = `Current Status: ${s.currentStatus} (at ${s.history[s.history.length-1].location})`;
+                }
+            } else {
+                container.classList.add('d-none');
+            }
+        });
+
+        // Update Shipment Status
+        document.getElementById('update-shipment-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('shipment-select').value;
+            const status = document.getElementById('update-status').value;
+            const location = document.getElementById('update-location').value;
+            const reason = document.getElementById('stop-reason').value;
+            
+            if (ShipmentManager.addUpdate(id, status, location, reason)) {
+                alert('Status Updated!');
+                document.getElementById('update-location').value = '';
+                document.getElementById('stop-reason').value = '';
+                document.getElementById('stop-reason-container').classList.add('d-none');
+                loadShipments();
+                // Refresh selection info
+                const s = ShipmentManager.getShipment(id);
+                document.getElementById('current-status-info').innerText = `Current Status: ${s.currentStatus} (at ${s.history[s.history.length-1].location})`;
+            }
+        });
+
+        // Edit Modal Logic
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        
+        window.openEdit = (id) => {
+            const s = ShipmentManager.getShipment(id);
+            if(!s) return;
+            
+            document.getElementById('edit-id').value = s.trackingId;
+            document.getElementById('edit-cost').value = s.cost;
+            document.getElementById('edit-origin').value = s.origin;
+            document.getElementById('edit-dest').value = s.destination;
+            document.getElementById('edit-status').value = s.currentStatus;
+            
+            // Payment Info
+            const badge = document.getElementById('payment-status-badge');
+            const confirmBtn = document.getElementById('confirm-payment-btn');
+            const paymentStatusSelect = document.getElementById('edit-payment-status');
+            const paymentMethodInput = document.getElementById('edit-payment-method');
+            
+            badge.className = 'badge ' + (s.paymentStatus === 'Paid' ? 'bg-success' : (s.paymentStatus === 'Processing' ? 'bg-warning text-dark' : 'bg-secondary'));
+            badge.innerText = s.paymentStatus || 'Unpaid';
+            paymentStatusSelect.value = s.paymentStatus || 'Unpaid';
+            paymentMethodInput.value = s.paymentMethod || '';
+            
+            if(s.paymentStatus === 'Processing') {
+                confirmBtn.classList.remove('d-none');
+                confirmBtn.onclick = () => {
+                    if(confirm('Confirm payment received?')) {
+                        ShipmentManager.confirmPayment(s.trackingId);
+                        alert('Payment Confirmed!');
+                        editModal.hide();
+                        loadShipments();
+                    }
+                };
+            } else {
+                confirmBtn.classList.add('d-none');
+            }
+
+            paymentStatusSelect.onchange = () => {
+                const v = paymentStatusSelect.value;
+                badge.className = 'badge ' + (v === 'Paid' ? 'bg-success' : (v === 'Processing' ? 'bg-warning text-dark' : 'bg-secondary'));
+                badge.innerText = v;
+                if (v === 'Processing') {
+                    confirmBtn.classList.remove('d-none');
+                } else {
+                    confirmBtn.classList.add('d-none');
+                }
+            };
+
+            editModal.show();
+        };
+
+        window.confirmShip = (id) => {
+            const s = ShipmentManager.getShipment(id);
+            if (!s) return;
+            const input = prompt('Enter shipment cost (USD):', String(s.cost || 0));
+            if (input === null) return;
+            const cost = parseFloat(input);
+            if (Number.isNaN(cost) || cost < 0) {
+                alert('Invalid cost.');
+                return;
+            }
+            ShipmentManager.confirmShipment(s.trackingId, cost);
+            alert('Shipment confirmed. Tracking is now active.');
+            loadShipments();
+        };
+
+        // Save Edit
+        document.getElementById('edit-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const s = ShipmentManager.getShipment(id);
+            
+            s.cost = parseFloat(document.getElementById('edit-cost').value);
+            s.origin = document.getElementById('edit-origin').value;
+            s.destination = document.getElementById('edit-dest').value;
+            s.currentStatus = document.getElementById('edit-status').value;
+            s.paymentStatus = document.getElementById('edit-payment-status').value;
+            s.paymentMethod = document.getElementById('edit-payment-method').value || null;
+            s.isPaid = s.paymentStatus === 'Paid';
+            
+            ShipmentManager.saveShipment(s);
+            alert('Changes Saved!');
+            editModal.hide();
+            loadShipments();
+        });
+
+        window.deleteShip = (id) => {
+            if(confirm('Are you sure you want to delete this shipment?')) {
+                ShipmentManager.deleteShipment(id);
+                loadShipments();
+            }
+        };
+
+    </script>
+</body>
+</html>

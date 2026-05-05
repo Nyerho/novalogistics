@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Dashboard - Nova Logistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+    <div id="page-loader" class="page-loader">
+        <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="loader-logo" alt="Nova Logistics">
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="brand-logo" alt="Nova Logistics">
+                <span>Nova Logistics</span>
+            </a>
+            <div class="d-flex">
+                <a href="index.html" class="btn btn-outline-secondary btn-sm">New Search</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="tracking-hero">
+        <div class="container">
+            <div class="tracking-hero-inner">
+                <div class="tracking-hero-title">Global Tracking</div>
+                <div class="tracking-hero-subtitle">Follow your shipment across pickup points and hubs worldwide</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        
+        <div id="error-alert" class="alert alert-danger d-none"></div>
+
+        <div id="tracking-result" class="d-none">
+            <div class="row">
+                <!-- Status & Simulation -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                            <span>Tracking Map</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="pending-approval" class="p-4 text-center d-none">
+                                <div class="fw-bold mb-1">Waiting for Admin Confirmation</div>
+                                <div class="text-muted">Tracking will start after the admin confirms your shipment and sets cost.</div>
+                            </div>
+                            <div id="map-simulation"></div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="card">
+                        <div class="card-header bg-white fw-bold">Shipment History</div>
+                        <div class="card-body">
+                            <div class="status-timeline" id="timeline-container">
+                                <!-- JS will populate -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details & Payment -->
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header bg-white fw-bold">Shipment Details</div>
+                        <div class="card-body">
+                            <h2 class="text-primary mb-3" id="display-id">TRK...</h2>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Current Status</small>
+                                <strong id="display-status" class="fs-5">In Transit</strong>
+                            </div>
+                            <div id="approval-alert" class="alert alert-info py-2 d-none"></div>
+                            <div id="hold-alert" class="alert alert-danger py-2 d-none"></div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Description</small>
+                                    <strong id="display-desc">Package</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Weight</small>
+                                    <strong id="display-weight">0kg</strong>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Origin</small>
+                                    <strong id="display-origin">New York</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Destination</small>
+                                    <strong id="display-dest">London</strong>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Total Cost</span>
+                                <strong class="fs-4" id="display-cost">$0.00</strong>
+                            </div>
+
+                            <div id="payment-section">
+                                <div id="payment-form-container">
+                                    <!-- Selection Step -->
+                                    <div id="payment-selection-step" class="mb-3">
+                                        <label class="form-label">Select Payment Method</label>
+                                        <select id="payment-method" class="form-select mb-2">
+                                            <option value="">-- Choose Method --</option>
+                                            <option value="Crypto">Cryptocurrency (BTC, USDT, ETH)</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                            <option value="Card">Credit/Debit Card</option>
+                                        </select>
+                                        <button id="pay-btn" class="btn btn-success w-100 py-2">
+                                            Proceed to Payment 💳
+                                        </button>
+                                    </div>
+
+                                    <!-- Details Step (Hidden Initially) -->
+                                    <div id="payment-details-container" class="d-none">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">Payment Details</h6>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="resetPayment()">Back</button>
+                                        </div>
+
+                                        <!-- Crypto Details -->
+                                        <div id="details-Crypto" class="payment-details d-none p-3 border rounded bg-light mb-3">
+                                            <p class="small text-muted mb-2">Send exact amount to one of these wallets:</p>
+                                            <div class="mb-2">
+                                                <strong>Bitcoin (BTC):</strong><br>
+                                                <code class="user-select-all text-break">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>USDT (TRC20):</strong><br>
+                                                <code class="user-select-all text-break">T9yD14Nj9j7xAB4dbGeiX9h8veHsn9drap</code>
+                                            </div>
+                                            <div class="mb-0">
+                                                <strong>Ethereum (ETH):</strong><br>
+                                                <code class="user-select-all text-break">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</code>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bank Details -->
+                                        <div id="details-Bank Transfer" class="payment-details d-none p-3 border rounded bg-light mb-3">
+                                            <p class="small text-muted mb-2">Transfer to the following account:</p>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li><strong>Bank:</strong> Chase Bank</li>
+                                                <li><strong>Account Name:</strong> Nova Logistics</li>
+                                                <li><strong>Account No:</strong> 1234567890</li>
+                                                <li><strong>Routing:</strong> 021000021</li>
+                                                <li><strong>Ref:</strong> <span class="ref-tracking-id fw-bold"></span></li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Card Details -->
+                                        <div id="details-Card" class="payment-details d-none p-3 border rounded bg-light mb-3">
+                                            <p class="small text-muted mb-2">Enter card details:</p>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Card Number" value="4242 4242 4242 4242" disabled>
+                                            <div class="row g-2">
+                                                <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="MM/YY" value="12/25" disabled></div>
+                                                <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="CVC" value="123" disabled></div>
+                                            </div>
+                                        </div>
+
+                                        <button id="confirm-sent-btn" class="btn btn-warning w-100 fw-bold">
+                                            I Have Made Payment ✅
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="processing-badge" class="alert alert-warning text-center py-2 mb-0 d-none">
+                                    ⏳ Payment Processing...
+                                    <small class="d-block mt-1">Waiting for Admin Confirmation</small>
+                                </div>
+                                <div id="paid-badge" class="alert alert-success text-center py-2 mb-0 d-none">
+                                    ✅ Payment Confirmed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Sender</small>
+                            <p id="display-sender" class="mb-2">John Doe</p>
+                            
+                            <small class="text-muted d-block">Receiver</small>
+                            <p id="display-receiver" class="mb-0">Jane Smith</p>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header bg-white fw-bold">Customer Reviews</div>
+                        <div class="card-body">
+                            <div class="review-item">
+                                <div class="review-stars">★★★★★</div>
+                                <div class="review-text">Accurate updates and clear tracking history.</div>
+                                <div class="review-meta">Sarah K. • Toronto</div>
+                            </div>
+                            <hr class="my-3">
+                            <div class="review-item">
+                                <div class="review-stars">★★★★★</div>
+                                <div class="review-text">Payment confirmation was quick and the shipment resumed immediately.</div>
+                                <div class="review-meta">Damilola A. • Abuja</div>
+                            </div>
+                            <hr class="my-3">
+                            <div class="review-item">
+                                <div class="review-stars">★★★★★</div>
+                                <div class="review-text">Smooth international delivery experience.</div>
+                                <div class="review-meta">Omar H. • Doha</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const trackId = params.get('track');
+
+            if (!trackId) {
+                showError('No tracking ID provided.');
+                return;
+            }
+
+            const shipment = ShipmentManager.getShipment(trackId);
+            
+            if (!shipment) {
+                showError(`Shipment with ID ${trackId} not found.`);
+                return;
+            }
+
+            renderShipment(shipment);
+
+            let lastSnapshot = JSON.stringify(shipment);
+            window.addEventListener('storage', (e) => {
+                if (e.key !== 'courier_shipments') return;
+                const next = ShipmentManager.getShipment(trackId);
+                if (!next) return;
+                const snap = JSON.stringify(next);
+                if (snap !== lastSnapshot) {
+                    lastSnapshot = snap;
+                    renderShipment(next);
+                }
+            });
+
+            window.setInterval(() => {
+                const next = ShipmentManager.getShipment(trackId);
+                if (!next) return;
+                const snap = JSON.stringify(next);
+                if (snap !== lastSnapshot) {
+                    lastSnapshot = snap;
+                    renderShipment(next);
+                }
+            }, 2000);
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('error-alert');
+            el.innerText = msg;
+            el.classList.remove('d-none');
+        }
+
+        function resetPayment() {
+            const selection = document.getElementById('payment-selection-step');
+            const details = document.getElementById('payment-details-container');
+            const method = document.getElementById('payment-method');
+            if (selection) selection.classList.remove('d-none');
+            if (details) details.classList.add('d-none');
+            if (method) method.value = '';
+        }
+
+        function renderShipment(shipment) {
+            document.getElementById('tracking-result').classList.remove('d-none');
+            
+            // Details
+            document.getElementById('display-id').innerText = shipment.trackingId;
+            document.getElementById('display-status').innerText = shipment.currentStatus;
+            document.getElementById('display-origin').innerText = shipment.origin;
+            document.getElementById('display-dest').innerText = shipment.destination;
+            document.getElementById('display-cost').innerText = '$' + shipment.cost.toFixed(2);
+            document.getElementById('display-sender').innerText = shipment.sender;
+            document.getElementById('display-receiver').innerText = shipment.receiver;
+            document.getElementById('display-desc').innerText = shipment.description || 'N/A';
+            document.getElementById('display-weight').innerText = shipment.weight || 'N/A';
+
+            const approvalAlert = document.getElementById('approval-alert');
+            const pendingApproval = document.getElementById('pending-approval');
+            if (!shipment.isApproved) {
+                approvalAlert.innerHTML = '<strong>Waiting for Admin Confirmation:</strong> Your shipment will start tracking after the admin confirms and sets the cost.';
+                approvalAlert.classList.remove('d-none');
+                pendingApproval.classList.remove('d-none');
+                document.getElementById('map-simulation').classList.add('d-none');
+                document.getElementById('payment-form-container').classList.add('d-none');
+                document.getElementById('processing-badge').classList.add('d-none');
+                document.getElementById('paid-badge').classList.add('d-none');
+            } else {
+                approvalAlert.classList.add('d-none');
+                approvalAlert.innerHTML = '';
+                pendingApproval.classList.add('d-none');
+                document.getElementById('map-simulation').classList.remove('d-none');
+            }
+
+            const holdAlert = document.getElementById('hold-alert');
+            if (shipment.isStopped) {
+                const reason = shipment.stopReason || 'Shipment is temporarily on hold.';
+                let payNote = '';
+                if (shipment.paymentStatus === 'Processing') {
+                    payNote = '<div class="mt-1"><strong>Action:</strong> Waiting for admin payment confirmation.</div>';
+                } else if (shipment.paymentStatus !== 'Paid') {
+                    payNote = '<div class="mt-1"><strong>Action:</strong> Complete payment below to continue.</div>';
+                }
+                holdAlert.innerHTML = `<strong>On Hold:</strong> ${reason}${payNote}`;
+                holdAlert.classList.remove('d-none');
+            } else {
+                holdAlert.classList.add('d-none');
+                holdAlert.innerHTML = '';
+            }
+
+            if (shipment.isApproved) {
+                // Payment Status
+                if (shipment.paymentStatus === 'Paid') {
+                    document.getElementById('payment-form-container').classList.add('d-none');
+                    document.getElementById('processing-badge').classList.add('d-none');
+                    document.getElementById('paid-badge').classList.remove('d-none');
+                } else if (shipment.paymentStatus === 'Processing') {
+                    document.getElementById('payment-form-container').classList.add('d-none');
+                    document.getElementById('processing-badge').classList.remove('d-none');
+                    document.getElementById('paid-badge').classList.add('d-none');
+                } else {
+                    document.getElementById('payment-form-container').classList.remove('d-none');
+                    document.getElementById('processing-badge').classList.add('d-none');
+                    document.getElementById('paid-badge').classList.add('d-none');
+                    resetPayment();
+                }
+            }
+
+            // Fill Tracking ID in Bank Ref
+            document.querySelectorAll('.ref-tracking-id').forEach(el => el.innerText = shipment.trackingId);
+
+            // Handle "Proceed to Payment" Button
+            const payBtn = document.getElementById('pay-btn');
+            const newPayBtn = payBtn.cloneNode(true);
+            payBtn.parentNode.replaceChild(newPayBtn, payBtn);
+            
+            newPayBtn.addEventListener('click', () => {
+                const method = document.getElementById('payment-method').value;
+                if (!method) {
+                    alert('Please select a payment method first.');
+                    return;
+                }
+
+                // Show Details Step
+                document.getElementById('payment-selection-step').classList.add('d-none');
+                document.getElementById('payment-details-container').classList.remove('d-none');
+                
+                // Show specific method details
+                document.querySelectorAll('.payment-details').forEach(el => el.classList.add('d-none'));
+                const detailsEl = document.getElementById(`details-${method}`);
+                if (detailsEl) detailsEl.classList.remove('d-none');
+            });
+
+            // Handle "I Have Made Payment" Button
+            const confirmBtn = document.getElementById('confirm-sent-btn');
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.addEventListener('click', () => {
+                const method = document.getElementById('payment-method').value;
+                if(confirm(`Confirm you have sent the payment via ${method}?`)) {
+                    ShipmentManager.payShipment(shipment.trackingId, method);
+                    alert('Payment Submitted! Waiting for admin confirmation.');
+                    location.reload();
+                }
+            });
+
+            // Timeline
+            const timeline = document.getElementById('timeline-container');
+            timeline.innerHTML = '';
+            // Reverse history to show newest first
+            [...shipment.history].reverse().forEach((event, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item ' + (index === 0 ? 'completed' : 'pending');
+                const reasonHtml = event.reason ? `<div class="mt-1"><span class="badge bg-danger">Reason</span> <span class="text-muted">${event.reason}</span></div>` : '';
+                item.innerHTML = `
+                    <h5 class="fw-bold">${event.status}</h5>
+                    <p class="mb-0 text-muted">${event.location}</p>
+                    ${reasonHtml}
+                    <small class="text-muted">${event.timestamp}</small>
+                `;
+                timeline.appendChild(item);
+            });
+
+            if (shipment.route && shipment.route.length > 0) {
+                let options = undefined;
+                if (shipment.isStopped) {
+                    const lastLoc = shipment.history && shipment.history.length ? shipment.history[shipment.history.length - 1].location : null;
+                    const idx = lastLoc ? shipment.route.indexOf(lastLoc) : -1;
+                    if (idx >= 0) options = { pauseAtIndex: idx };
+                }
+                if (shipment.isApproved) {
+                    Simulation.start(shipment.route, 'map-simulation', options);
+                }
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('page-loader');
+            if (!loader) return;
+            loader.classList.add('is-hidden');
+            window.setTimeout(() => loader.remove(), 300);
+        });
+    </script>
+</body>
+</html>

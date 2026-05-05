@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Logistics - Global Shipping & Tracking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+    <div id="page-loader" class="page-loader">
+        <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="loader-logo" alt="Nova Logistics">
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="css/pixverse_t2i_ori_b3b17f94-c710-4f68-aa2d-921520f1d6b5.webp" class="brand-logo" alt="Nova Logistics">
+                <span>Nova Logistics</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="alert('Contact us at support@novalogistics.com')">Contact</a></li>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-outline-primary" href="request.html">Request Pickup</a></li>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-dark" href="login.html">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section" id="hero">
+        <div class="container">
+            <div id="hero-content">
+                <h1 class="display-4 fw-bold" id="hero-title">Global Logistics Solutions</h1>
+                <p class="lead" id="hero-subtitle">Ship worldwide with real-time tracking and secure payments</p>
+                <div class="hero-quote mt-3">
+                    <div class="hero-quote-text" id="hero-quote">"Fast delivery, clear updates, and easy payment."</div>
+                    <div class="hero-quote-meta" id="hero-quote-meta">— A satisfied customer</div>
+                </div>
+                <div class="hero-stats row g-3 justify-content-center mt-3">
+                    <div class="col-6 col-md-3">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">24/7</div>
+                            <div class="hero-stat-label">Support</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">Worldwide</div>
+                            <div class="hero-stat-label">Coverage</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">99.9%</div>
+                            <div class="hero-stat-label">Delivery SLA</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">Real-time</div>
+                            <div class="hero-stat-label">Tracking</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="request.html" class="btn btn-primary btn-lg me-2 px-5 py-3 fw-bold">Start Sending</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Box -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="tracking-box text-center">
+                    <h3 class="mb-3">Track Your Shipment</h3>
+                    <form id="track-form" class="d-flex gap-2">
+                        <input type="text" id="tracking-input" class="form-control form-control-lg" placeholder="Enter Tracking ID (e.g. TRK123)" required>
+                        <button type="submit" class="btn btn-primary btn-lg">Track</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="container py-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <h3>🌍</h3>
+                        <h5>Global Reach</h5>
+                        <p>We deliver to over 200 countries worldwide.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <h3>⏱️</h3>
+                        <h5>Real-time Tracking</h5>
+                        <p>Monitor your package status in real-time.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <h3>🔒</h3>
+                        <h5>Secure Delivery</h5>
+                        <p>Your packages are safe with our premium handling.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <div class="section-image-card">
+                    <img src="css/shipping11.jpg" class="section-image" alt="Global shipping">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h4 class="fw-bold mb-2">Ship Worldwide with Nova Logistics</h4>
+                <p class="text-muted mb-3">From local pickup to international delivery, Nova Logistics helps you send packages across the world with transparent updates.</p>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="mini-feature">
+                            <div class="mini-feature-title">Door-to-door pickup</div>
+                            <div class="mini-feature-text">Request pickup and get your tracking ID instantly.</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="mini-feature">
+                            <div class="mini-feature-title">Live progress</div>
+                            <div class="mini-feature-text">See movement updates and stops on your tracking page.</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="mini-feature">
+                            <div class="mini-feature-title">Flexible payments</div>
+                            <div class="mini-feature-text">Pay by Card, Bank Transfer, or Crypto.</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="mini-feature">
+                            <div class="mini-feature-title">Admin confirmation</div>
+                            <div class="mini-feature-text">Payment status updates after admin verification.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold mb-1">How It Works</h4>
+            <p class="text-muted mb-0">Request pickup, track updates, and pay securely</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="how-icon mb-3">1</div>
+                        <h5 class="fw-bold">Create a Shipment</h5>
+                        <p class="text-muted mb-0">Request pickup and get an auto-generated tracking code instantly.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="how-icon mb-3">2</div>
+                        <h5 class="fw-bold">Track in Real Time</h5>
+                        <p class="text-muted mb-0">Follow pickup locations and progress as the admin updates your shipment.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="how-icon mb-3">3</div>
+                        <h5 class="fw-bold">Pay & Get Confirmed</h5>
+                        <p class="text-muted mb-0">Choose Card, Bank Transfer, or Crypto and wait for admin confirmation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold mb-1">Customer Reviews</h4>
+            <p class="text-muted mb-0">Trusted by senders worldwide</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-text">My package moved through multiple hubs and the tracking updates were very clear. Payment confirmation was fast.</div>
+                    <div class="testimonial-meta">Ada C. • Lagos</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-text">Easy pickup request and I got a tracking ID immediately. Delivery was smooth and professional.</div>
+                    <div class="testimonial-meta">Michael R. • London</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-text">Bank transfer option worked perfectly. The admin confirmed payment quickly and tracking continued.</div>
+                    <div class="testimonial-meta">Fatima S. • Dubai</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="partners-section py-5">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h4 class="fw-bold mb-1">Trusted Partners</h4>
+                <p class="text-muted mb-0">Working with global carriers and payment rails</p>
+            </div>
+            <div class="row g-3 justify-content-center align-items-center text-center">
+                <div class="col-6 col-md-3">
+                    <div class="partner-card">
+                        <img src="css/download.png" class="partner-logo" alt="FedEx">
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="partner-card">
+                        <svg class="partner-svg" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DHL">
+                            <rect x="0" y="0" width="240" height="80" rx="10" fill="#FFCC00"/>
+                            <rect x="0" y="18" width="240" height="6" fill="#D40511"/>
+                            <rect x="0" y="56" width="240" height="6" fill="#D40511"/>
+                            <text x="120" y="52" text-anchor="middle" font-size="42" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#D40511">DHL</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="partner-card">
+                        <svg class="partner-svg" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UPS">
+                            <rect x="0" y="0" width="240" height="80" rx="10" fill="#2B1B0E"/>
+                            <path d="M120 10c38 0 70 13 70 13v20c0 23-23 37-70 37S50 66 50 43V23s32-13 70-13z" fill="#FFC72C"/>
+                            <text x="120" y="55" text-anchor="middle" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="800" fill="#2B1B0E">UPS</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="partner-card">
+                        <svg class="partner-svg" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stripe">
+                            <rect x="0" y="0" width="240" height="80" rx="10" fill="#635BFF"/>
+                            <text x="120" y="52" text-anchor="middle" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#ffffff">STRIPE</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-section">
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="fw-bold fs-5 mb-2">Nova Logistics</div>
+                    <div class="text-muted">Global shipping, live tracking, and admin-confirmed payments.</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="fw-bold mb-2">Quick Links</div>
+                    <div class="d-flex flex-column gap-2">
+                        <a class="footer-link" href="index.html">Track Shipment</a>
+                        <a class="footer-link" href="request.html">Request Pickup</a>
+                        <a class="footer-link" href="login.html">Login</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="fw-bold mb-2">Support</div>
+                    <div class="text-muted mb-2">support@novalogistics.com</div>
+                    <div class="text-muted">Mon–Sun • 24/7</div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                <div class="text-muted small">© <span id="footer-year"></span> Nova Logistics. All rights reserved.</div>
+                <div class="text-muted small">Privacy • Terms</div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const heroSlides = [
+            {
+                title: 'Nova Logistics Worldwide Shipping',
+                subtitle: 'Send packages globally with real-time tracking updates',
+                quote: '"Fast delivery, clear updates, and easy payment."',
+                quoteMeta: '— A satisfied customer',
+                bg: "url('shipping.jpg')"
+            },
+            {
+                title: 'Track Every Stop on the Route',
+                subtitle: 'See live movement and updates from pickup to delivery',
+                quote: '"The tracking map helped me follow every hub and update."',
+                quoteMeta: '— Michael R. • London',
+                bg: "url('FindAPlace_727x463_April_2026.jpg')"
+            },
+            {
+                title: 'Flexible Payment Options',
+                subtitle: 'Pay by Card, Bank Transfer, or Crypto with admin confirmation',
+                quote: '"Bank transfer was simple and confirmation came quickly."',
+                quoteMeta: '— Fatima S. • Dubai',
+                bg: "url('SaveOnDeliveries_727x463.jpg')"
+            },
+            {
+                title: 'Save on Deliveries',
+                subtitle: 'Reliable shipping with transparent pricing and updates',
+                quote: '"Nova Logistics made international shipping stress-free."',
+                quoteMeta: '— Ada C. • Lagos',
+                bg: "url('shipping11.jpg')"
+            }
+        ];
+
+        let heroIndex = 0;
+        const heroEl = document.getElementById('hero');
+        const heroTitleEl = document.getElementById('hero-title');
+        const heroSubtitleEl = document.getElementById('hero-subtitle');
+        const heroQuoteEl = document.getElementById('hero-quote');
+        const heroQuoteMetaEl = document.getElementById('hero-quote-meta');
+        const heroContentEl = document.getElementById('hero-content');
+
+        function setHeroSlide(nextIndex) {
+            const slide = heroSlides[nextIndex];
+            if (!slide) return;
+
+            heroContentEl.classList.add('hero-fade');
+
+            window.setTimeout(() => {
+                heroTitleEl.innerText = slide.title;
+                heroSubtitleEl.innerText = slide.subtitle;
+                if (heroQuoteEl) heroQuoteEl.innerText = slide.quote || '';
+                if (heroQuoteMetaEl) heroQuoteMetaEl.innerText = slide.quoteMeta || '';
+                heroEl.style.setProperty('--hero-bg', slide.bg);
+                heroContentEl.classList.remove('hero-fade');
+            }, 180);
+        }
+
+        setHeroSlide(heroIndex);
+        window.setInterval(() => {
+            heroIndex = (heroIndex + 1) % heroSlides.length;
+            setHeroSlide(heroIndex);
+        }, 5500);
+
+        document.getElementById('footer-year').innerText = new Date().getFullYear();
+
+        document.getElementById('track-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('tracking-input').value;
+            window.location.href = `dashboard.html?track=${id}`;
+        });
+
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('page-loader');
+            if (!loader) return;
+            loader.classList.add('is-hidden');
+            window.setTimeout(() => loader.remove(), 300);
+        });
+    </script>
+</body>
+</html>

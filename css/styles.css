@@ -1,0 +1,481 @@
+/* Custom Styles */
+:root {
+    --nova-primary: #0a4b78;
+    --nova-primary-rgb: 10, 75, 120;
+    --nova-secondary: #08a6c9;
+    --nova-secondary-rgb: 8, 166, 201;
+    --nova-accent: #f28a1b;
+    --nova-accent-rgb: 242, 138, 27;
+    --nova-dark: #0b1220;
+
+    --bs-primary: var(--nova-primary);
+    --bs-primary-rgb: var(--nova-primary-rgb);
+    --bs-link-color: var(--nova-primary);
+    --bs-link-hover-color: #083a5c;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-light .navbar-brand {
+    color: var(--nova-primary) !important;
+}
+
+.navbar-dark .navbar-brand {
+    color: #ffffff !important;
+}
+
+.brand-logo {
+    height: 30px;
+    width: auto;
+    display: block;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--nova-primary);
+    --bs-btn-border-color: var(--nova-primary);
+    --bs-btn-hover-bg: #083a5c;
+    --bs-btn-hover-border-color: #083a5c;
+    --bs-btn-active-bg: #062e48;
+    --bs-btn-active-border-color: #062e48;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--nova-primary);
+    --bs-btn-border-color: var(--nova-primary);
+    --bs-btn-hover-bg: var(--nova-primary);
+    --bs-btn-hover-border-color: var(--nova-primary);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-active-bg: #083a5c;
+    --bs-btn-active-border-color: #083a5c;
+}
+
+.page-loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.page-loader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-logo {
+    width: 120px;
+    height: auto;
+    animation: loaderPulse 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 8px 20px rgba(10,75,120,0.25));
+}
+
+@keyframes loaderPulse {
+    0% { transform: scale(0.98) rotate(0deg); opacity: 0.9; }
+    50% { transform: scale(1.03) rotate(2deg); opacity: 1; }
+    100% { transform: scale(0.98) rotate(0deg); opacity: 0.9; }
+}
+
+.hero-section {
+    --hero-bg: url('shipping.jpg');
+    background: linear-gradient(rgba(0,0,0,0.62), rgba(0,0,0,0.62)), var(--hero-bg);
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-fade {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+#hero-content {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hero-stats {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-quote {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.16);
+}
+
+.hero-quote-text {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.hero-quote-meta {
+    opacity: 0.85;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.hero-stat {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 14px 12px;
+}
+
+.hero-stat-value {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.1;
+}
+
+.hero-stat-label {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.tracking-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-top: -50px;
+    position: relative;
+    z-index: 10;
+}
+
+.status-timeline {
+    position: relative;
+    padding-left: 30px;
+    margin-top: 20px;
+    border-left: 2px solid #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -36px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--nova-primary);
+    border: 2px solid white;
+}
+
+.timeline-item.completed::before {
+    background: #198754;
+}
+
+.timeline-item.pending::before {
+    background: #dee2e6;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.login-hero {
+    height: 110px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    background: linear-gradient(rgba(11,18,32,0.45), rgba(11,18,32,0.45)), url('FindAPlace_727x463_April_2026.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.login-logo {
+    height: 44px;
+    width: auto;
+}
+
+#map-simulation {
+    height: 300px;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(var(--nova-primary-rgb),0.16), rgba(var(--nova-primary-rgb),0) 42%),
+        radial-gradient(circle at 75% 55%, rgba(var(--nova-secondary-rgb),0.18), rgba(var(--nova-secondary-rgb),0) 48%),
+        linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75)),
+        repeating-linear-gradient(0deg, rgba(var(--nova-primary-rgb),0.06), rgba(var(--nova-primary-rgb),0.06) 1px, transparent 1px, transparent 18px),
+        repeating-linear-gradient(90deg, rgba(var(--nova-primary-rgb),0.06), rgba(var(--nova-primary-rgb),0.06) 1px, transparent 1px, transparent 18px);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.map-point {
+    width: 15px;
+    height: 15px;
+    background-color: var(--nova-accent);
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: all 1s ease;
+}
+
+.map-line {
+    position: absolute;
+    height: 2px;
+    background-color: var(--nova-primary);
+    transform-origin: 0 0;
+}
+
+.truck-icon {
+    font-size: 24px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: all 2s linear;
+}
+
+.leaflet-truck .truck-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: rgba(242,138,27,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 22px rgba(10,75,120,0.25);
+    border: 1px solid rgba(255,255,255,0.6);
+}
+
+.how-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(13,110,253,0.12);
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.section-image-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+}
+
+.section-image {
+    width: 100%;
+    height: 360px;
+    object-fit: cover;
+    display: block;
+}
+
+.mini-feature {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    height: 100%;
+}
+
+.mini-feature-title {
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.mini-feature-text {
+    color: #6c757d;
+    margin: 0;
+    font-size: 14px;
+}
+
+.testimonial-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+    height: 100%;
+}
+
+.testimonial-stars {
+    color: #f4b400;
+    letter-spacing: 1px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.testimonial-text {
+    color: #212529;
+    margin-bottom: 10px;
+}
+
+.testimonial-meta {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.partners-section {
+    background: #ffffff;
+}
+
+.partner-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.partner-logo {
+    max-width: 150px;
+    max-height: 52px;
+    width: 100%;
+    object-fit: contain;
+    filter: grayscale(100%);
+    opacity: 0.9;
+    transition: filter 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.partner-svg {
+    width: 150px;
+    height: 52px;
+    filter: grayscale(100%);
+    opacity: 0.9;
+    transition: filter 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.partner-card:hover .partner-logo,
+.partner-card:hover .partner-svg {
+    filter: none;
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.footer-section {
+    background: #0b1220;
+    color: #ffffff;
+}
+
+.footer-link {
+    color: rgba(255,255,255,0.78);
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.tracking-hero {
+    background: linear-gradient(rgba(11,18,32,0.65), rgba(11,18,32,0.65)), url('shipping.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 26px 0;
+}
+
+.tracking-hero-inner {
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 18px 18px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+.tracking-hero-title {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.tracking-hero-subtitle {
+    opacity: 0.9;
+}
+
+.review-stars {
+    color: #f4b400;
+    letter-spacing: 1px;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.review-text {
+    margin-bottom: 6px;
+}
+
+.review-meta {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.request-hero {
+    background: linear-gradient(rgba(11,18,32,0.55), rgba(11,18,32,0.55)), url('SaveOnDeliveries_727x463.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 150px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.request-hero-overlay {
+    width: 100%;
+    padding: 18px;
+    color: #ffffff;
+}
+
+.admin-hero {
+    background: linear-gradient(rgba(11,18,32,0.65), rgba(11,18,32,0.65)), url('shipping11.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 20px 0;
+}
+
+.admin-hero-inner {
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+.admin-hero-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.admin-hero-subtitle {
+    opacity: 0.9;
+}
