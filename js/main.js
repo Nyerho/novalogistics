@@ -43,8 +43,10 @@ window.ShipmentManager = {
     },
 
     getShipment: (trackingId) => {
+        const id = String(trackingId || '').trim().toUpperCase();
+        if (!id) return null;
         const shipments = ShipmentManager.getAllShipments();
-        return shipments.find(s => s.trackingId === trackingId);
+        return shipments.find(s => String(s.trackingId || '').trim().toUpperCase() === id);
     },
 
     saveShipment: (shipment) => {

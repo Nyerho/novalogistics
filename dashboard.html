@@ -233,7 +233,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const trackId = params.get('track');
+            const trackId = String(params.get('track') || '').trim().toUpperCase();
 
             if (!trackId) {
                 showError('No tracking ID provided.');
@@ -243,7 +243,7 @@
             const shipment = ShipmentManager.getShipment(trackId);
             
             if (!shipment) {
-                showError(`Shipment with ID ${trackId} not found.`);
+                showError(`Shipment with ID ${trackId} not found. Make sure you opened Admin and Tracking from the same website address (same domain).`);
                 return;
             }
 
